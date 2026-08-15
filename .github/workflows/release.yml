@@ -21,9 +21,28 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Tag release if VERSION changed
+      - name: Tag release if this push merged the release PR
         run: |
-          if git rev-parse HEAD^ >/dev/null 2>&1 && ! git diff --quiet HEAD^ HEAD -- VERSION; then
+          # A VERSION diff alone isn't sufficient: it also fires the first time
+          # VERSION is introduced by an unrelated PR. Require the push to
+          # actually be the release/next branch landing on main - detected via
+          # its own commit message ("Release: v...", covers squash/rebase
+          # merges) or, for a merge-commit-strategy merge, either parent's
+          # subject.
+          is_release_merge=false
+          subject="$(git log -1 --format=%s HEAD)"
+          case "$subject" in
+            "Release: v"*) is_release_merge=true ;;
+            *release/next*) is_release_merge=true ;;
+          esac
+          if [ "$is_release_merge" = false ] && git rev-parse HEAD^2 >/dev/null 2>&1; then
+            subject2="$(git log -1 --format=%s HEAD^2)"
+            case "$subject2" in
+              "Release: v"*) is_release_merge=true ;;
+            esac
+          fi
+
+          if [ "$is_release_merge" = true ] && git rev-parse HEAD^ >/dev/null 2>&1 && ! git diff --quiet HEAD^ HEAD -- VERSION; then
             tag="v$(cat VERSION)"
             if git rev-parse "$tag" >/dev/null 2>&1; then
               echo "Tag $tag already exists, skipping."
@@ -33,7 +52,7 @@ jobs:
               echo "Tagged $tag."
             fi
           else
-            echo "VERSION unchanged in this push, nothing to tag."
+            echo "Not a release-PR merge, nothing to tag."
           fi
 
       - name: Check for pending release
