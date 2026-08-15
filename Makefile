@@ -27,14 +27,18 @@ frontend-shell:
 migrate:
 	docker compose exec backend uv run alembic upgrade head
 
+# lint/format/test all run inside the containers (like `migrate` does) rather than on the
+# host — that way they work with just Docker running, no native uv/pnpm install required, and
+# the backend targets automatically use the right DATABASE_URL for the Compose Postgres.
+# Requires `make up` (or `make up -d`) to already be running.
 lint:
-	cd backend && uv run ruff check .
-	cd frontend && pnpm lint
+	docker compose exec backend uv run ruff check .
+	docker compose exec frontend pnpm lint
 
 format:
-	cd backend && uv run ruff format .
-	cd frontend && pnpm exec prettier --write .
+	docker compose exec backend uv run ruff format .
+	docker compose exec frontend pnpm exec prettier --write .
 
 test:
-	cd backend && uv run pytest
-	cd frontend && pnpm test
+	docker compose exec backend uv run pytest
+	docker compose exec frontend pnpm test
