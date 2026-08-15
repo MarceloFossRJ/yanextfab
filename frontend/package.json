@@ -9,6 +9,7 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "gen:api-client": "node scripts/generate-api-client.mjs",
     "watch:api-client": "chokidar \"${OPENAPI_SCHEMA_PATH:-../backend/openapi.json}\" -c \"pnpm run gen:api-client\" --initial"

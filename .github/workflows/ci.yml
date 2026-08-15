@@ -53,7 +53,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
       - run: pnpm run format:check
-      - run: pnpm exec tsc --noEmit
+      - run: pnpm run typecheck
       - run: pnpm run test
 
   api-client-drift:
