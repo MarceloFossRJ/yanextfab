@@ -21,12 +21,18 @@ You have two options. Pick one — you don't need both.
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (includes Docker Compose)
 - `git`
 
-**Option B — running the apps natively (faster iteration, more setup):** everything in Option
-A, plus:
+Everything — including `make lint`, `make format`, and `make test` — runs *inside* the
+containers, so Option A alone is enough for the entire day-to-day workflow described in this
+README. The one exception is [pre-commit hooks](#enable-pre-commit-hooks-optional-recommended),
+which run on your machine at `git commit` time and so need native tooling regardless.
+
+**Option B — running the apps natively (faster iteration, more setup, needed for pre-commit
+hooks):** everything in Option A, plus:
 - [Node.js 24+](https://nodejs.org/) and [pnpm](https://pnpm.io/installation) (frontend)
 - [Python 3.12+](https://www.python.org/) and [uv](https://docs.astral.sh/uv/getting-started/installation/) (backend)
-- A local Postgres instance (or run just the `postgres` service from Docker Compose — see
-  below)
+- A local Postgres instance, *or* just the `postgres` service from Docker Compose on its own:
+  `docker compose up postgres -d` starts only that container (see `docker-compose.yml` for its
+  connection details).
 
 `make` is used throughout this README as a shorthand, but it's optional — every `make <target>`
 command is a one-liner defined in the root `Makefile`; if you don't have `make` installed, open
@@ -49,6 +55,8 @@ tested on native Windows (PowerShell/cmd).
    - `backend/pyproject.toml` — the `[project]` `name` field (currently `"backend"`)
    - `frontend/src/components/dashboard/app-sidebar.tsx` — the "Yanextfab" text shown in the
      dashboard sidebar
+   - `frontend/src/app/layout.tsx` — the page `<title>`/description (`metadata`) shown in the
+     browser tab
    - `frontend/src/app/register/page.tsx` — "Get started with Yanextfab." copy
    - `backend/src/app/main.py` — the FastAPI `title="Yanextfab API"`
    - `backend/src/app/core/mail.py` — the password-reset email subject line
@@ -89,6 +97,12 @@ automatically on startup), the frontend, and Mailpit (a fake email inbox for tes
 password-reset flow — see below). The first run downloads base images and installs
 dependencies, so it can take a few minutes; subsequent runs are much faster.
 
+**This command keeps running in your terminal** (it's streaming live logs from all four
+containers) rather than returning you to the prompt — that's expected, not a hang. Leave it
+running and open a *new* terminal tab/window for everything else in this README, or add `-d` to
+run detached instead (`docker compose up --build -d`) and use `make logs` whenever you want to
+see the live logs.
+
 **How to tell it worked:** once the logs settle, open <http://localhost:3000> — you should land
 on a login page. That confirms the frontend is up and can reach the backend.
 
@@ -103,13 +117,16 @@ on a login page. That confirms the frontend is up and can reach the backend.
 2. You'll land on the dashboard. Try the **Items** page (a small create/edit/delete example —
    proves the typed API path works end-to-end) and the **Chat** page (the AI agent example — it
    needs `ANTHROPIC_API_KEY` to actually reply, see above).
-3. Try "Forgot password?" from the login page, then check <http://localhost:8025> — the reset
-   email actually arrives there in dev, with a working reset link, instead of going to a real
-   inbox.
+3. Log out — click your email at the bottom of the sidebar, then **Log out**. This takes you
+   back to the login page.
+4. From the login page, click **"Forgot password?"**, enter the email you registered with, then
+   check <http://localhost:8025> — the reset email actually arrives there in dev, with a working
+   reset link, instead of going to a real inbox.
 
 ### Other commands
 
-All defined in the root `Makefile`:
+All defined in the root `Makefile`. Everything except `up`/`down`/`build` requires the stack to
+already be running (`make up`) — they run *inside* the containers, not on your machine.
 
 | Command | What it does |
 | --- | --- |
@@ -171,14 +188,22 @@ show the sidebar.
 
 ## Testing
 
-- **Backend**: [pytest](https://docs.pytest.org/), via `cd backend && uv run pytest` (or
-  `make test` for both suites). Tests live in `backend/tests/`; a real (disposable) Postgres
-  database is required — see `backend/tests/conftest.py`, which creates and tears down its own
-  test database automatically against whatever `DATABASE_URL` you have configured.
-- **Frontend**: [Vitest](https://vitest.dev/), via `cd frontend && pnpm test`. Tests live next
-  to the code they test as `*.test.ts` files (e.g. `frontend/src/lib/schemas/auth.test.ts`).
+`make test` (with the stack running via `make up`) runs both suites inside the containers,
+with zero extra setup:
 
-Both run automatically in CI on every pull request — see `.github/workflows/ci.yml`.
+- **Backend**: [pytest](https://docs.pytest.org/). Tests live in `backend/tests/`; a real
+  (disposable) Postgres database is required — see `backend/tests/conftest.py`, which creates
+  and tears down its own test database automatically against whatever `DATABASE_URL` it's given.
+- **Frontend**: [Vitest](https://vitest.dev/). Tests live next to the code they test as
+  `*.test.ts` files (e.g. `frontend/src/lib/schemas/auth.test.ts`).
+
+Running natively instead (Option B): `cd backend && uv run pytest` / `cd frontend && pnpm test`
+— for the backend, make sure `DATABASE_URL` in `backend/.env` points at a Postgres you can
+actually reach (e.g. `postgresql+asyncpg://yanextfab:yanextfab@localhost:5433/yanextfab` for the
+Compose Postgres — note **5433**, not Postgres's default 5432, see
+[Troubleshooting](#troubleshooting)).
+
+Both suites run automatically in CI on every pull request — see `.github/workflows/ci.yml`.
 
 ## Enable pre-commit hooks (optional, recommended)
 
