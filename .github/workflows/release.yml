@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-pr:
+    if: github.repository == 'MarceloFossRJ/yanextfab'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Tag release if VERSION changed
+        run: |
+          if git rev-parse HEAD^ >/dev/null 2>&1 && ! git diff --quiet HEAD^ HEAD -- VERSION; then
+            tag="v$(cat VERSION)"
+            if git rev-parse "$tag" >/dev/null 2>&1; then
+              echo "Tag $tag already exists, skipping."
+            else
+              git tag "$tag"
+              git push origin "$tag"
+              echo "Tagged $tag."
+            fi
+          else
+            echo "VERSION unchanged in this push, nothing to tag."
+          fi
+
+      - name: Check for pending release
+        id: check
+        run: |
+          if python3 scripts/compute-release.py --check; then
+            echo "pending=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pending=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compute release
+        if: steps.check.outputs.pending == 'true'
+        id: compute
+        run: |
+          python3 scripts/compute-release.py --write
+          echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+
+      - name: Open or update release pull request
+        if: steps.check.outputs.pending == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.compute.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B release/next
+          git add VERSION CHANGELOG.md
+          git commit -m "Release: v${VERSION}"
+          git push --force origin release/next
+
+          existing_pr="$(gh pr list --head release/next --base main --state open --json number --jq '.[0].number')"
+          if [ -n "$existing_pr" ]; then
+            gh pr edit "$existing_pr" --title "Release: v${VERSION}" --body "Automated release PR. Merge to finalize v${VERSION}."
+          else
+            gh pr create --head release/next --base main --title "Release: v${VERSION}" --body "Automated release PR. Merge to finalize v${VERSION}."
+          fi
