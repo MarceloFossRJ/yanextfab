@@ -71,12 +71,16 @@ backend/**/*.sage.py
 
 # Environments
 .env
+.venv
 backend/.venv
 backend/env/
 backend/venv/
 backend/ENV/
 backend/env.bak/
 backend/venv.bak/
+
+# mkdocs
+site/
 
 # Pyre type checker
 backend/.pyre/

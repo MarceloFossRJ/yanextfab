@@ -1,0 +1,45 @@
+site_name: Yanextfab
+site_description: Yet another Next.js and FastAPI boilerplate — docs for using and extending the template.
+repo_url: https://github.com/MarceloFossRJ/yanextfab
+repo_name: MarceloFossRJ/yanextfab
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Project Structure: project-structure.md
+  - Adding Your Own Features: adding-features.md
+  - Testing: testing.md
+  - Tech Stack: tech-stack.md
+  - Configuration: configuration.md
+  - Deployment: deployment.md
+  - API Client Codegen: api-client-codegen.md
+  - Troubleshooting: troubleshooting.md
+
+markdown_extensions:
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
