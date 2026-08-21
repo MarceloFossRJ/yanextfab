@@ -35,22 +35,26 @@ tested on native Windows (PowerShell/cmd).
 
 ## Creating Your Own Project From This Template
 
-1. On GitHub, click **"Use this template"** on the Yanextfab repo (or `git clone` it if you're
-   not using GitHub) to get your own copy under a new name.
-2. Rename the project. Nothing does this automatically — it's a handful of places where
-   "Yanextfab"/"yanextfab" is hardcoded as boilerplate branding:
-   - `frontend/package.json` — the `"name"` field (currently `"frontend"`, fine to leave as-is
-     or rename)
-   - `backend/pyproject.toml` — the `[project]` `name` field (currently `"backend"`)
-   - `frontend/src/components/dashboard/app-sidebar.tsx` — the "Yanextfab" text shown in the
-     dashboard sidebar
-   - `frontend/src/app/layout.tsx` — the page `<title>`/description (`metadata`) shown in the
-     browser tab
-   - `frontend/src/app/register/page.tsx` — "Get started with Yanextfab." copy
-   - `backend/src/app/main.py` — the FastAPI `title="Yanextfab API"`
-   - `backend/src/app/core/mail.py` — the password-reset email subject line
-   - `LICENSE` — the copyright holder name
-   - The root `README.md` — the title and description
+1. Make sure the repo has GitHub's **Template repository** setting enabled first — go to
+   **Settings → General** on the repo and check "Template repository". The green
+   **"Use this template"** button only appears once that's on. Then, on GitHub, click
+   **"Use this template"** on the Yanextfab repo (or `git clone` it if you're not using GitHub)
+   to get your own copy under a new name.
+2. Rename the project by running `make init` (or `uv run scripts/init.py` directly) right after
+   cloning. It interactively prompts for a project display name, a short description, and an
+   author name, then:
+   - derives a slug, a title-cased name, the GitHub owner/repo (from your `origin` remote), and
+     the current year, without asking for them separately
+   - prints a summary of everything it's about to do and asks for a single y/n confirmation
+   - on confirmation, rewrites every hardcoded "Yanextfab"/"yanextfab" occurrence — branding
+     text, `LICENSE`, both `README.md`s, `mkdocs.yml`, both `pyproject.toml` files, frontend and
+     backend source files, the Docker/CI Postgres and SMTP placeholders, and the release
+     workflow's repository gate
+   - deletes itself (and the `make init` target) once it's done
+
+   `frontend/package.json`'s `"name"` field and `backend/pyproject.toml`'s `"name"` field are
+   left as-is (`"frontend"`/`"backend"`) — they're already generic, not "Yanextfab" branding, so
+   renaming them is optional and up to you.
 3. Continue with **Quickstart** below.
 
 The `openspec/` directory is this template's own internal planning history (the proposal,
