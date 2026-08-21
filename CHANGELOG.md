@@ -13,15 +13,16 @@ the design behind this process.
 
 ### ADDED
 
+### MODIFIED
+
+### REMOVED
+
+## [0.2.0] - 2026-08-16
+
+### ADDED
+
 - Published documentation site (mkdocs + Material for MkDocs), deployed to GitHub Pages on
-  every push to `main`, covering getting started, project structure, adding features, testing,
-  tech stack, configuration, deployment, API client codegen, and troubleshooting.
 
 ### MODIFIED
 
 - **BREAKING**: `README.md` is trimmed to the project pitch, prerequisites, "Use this template"
-  steps, and a quickstart, linking out to the documentation site for everything else. Anyone
-  deep-linking to a specific README section/anchor that moved should update the link to the
-  corresponding docs site page.
-
-### REMOVED
