@@ -44,12 +44,15 @@ Desktop's WSL2 backend.
 
 ## Use this template
 
-1. On GitHub, click **"Use this template"** on the Yanextfab repo (or `git clone` it if you're
-   not using GitHub) to get your own copy under a new name.
-2. Rename the project — see
+1. Make sure the repo has GitHub's **Template repository** setting enabled (Settings → General →
+   check "Template repository") — the button below only appears once that's on. Then, on GitHub,
+   click **"Use this template"** on the Yanextfab repo (or `git clone` it if you're not using
+   GitHub) to get your own copy under a new name.
+2. Rename the project — run `make init` (or `uv run scripts/init.py`) right after cloning. It
+   prompts for a project name, description, and author, then automatically rewrites every
+   hardcoded template-branding string across the repo — see
    [Creating Your Own Project From This Template](https://marcelofossrj.github.io/yanextfab/getting-started/#creating-your-own-project-from-this-template)
-   in the docs for the full list of places "Yanextfab"/"yanextfab" is hardcoded as boilerplate
-   branding.
+   in the docs for exactly what it changes.
 3. Continue with **Quickstart** below.
 
 ## Quickstart

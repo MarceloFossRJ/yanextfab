@@ -1,4 +1,7 @@
-.PHONY: up down logs build ps restart backend-shell frontend-shell migrate lint format test
+.PHONY: up down logs build ps restart backend-shell frontend-shell migrate lint format test init
+
+init:
+	uv run scripts/init.py
 
 up:
 	docker compose up --build
